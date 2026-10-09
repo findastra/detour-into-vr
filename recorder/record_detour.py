@@ -77,7 +77,7 @@ class Recorder:
         cmd = [
             sys.executable, "-m", "streamlink",
             "--hls-live-edge", "6",          # start a little behind live so nothing is missed
-            "--hls-segment-queue-threshold", "0",  # don't quit on a short Twitch stall; --stream-timeout covers real drops
+            "--stream-segmented-queue-deadline", "0",  # don't quit on a short Twitch stall; --stream-timeout covers real drops
             "--stream-segment-attempts", "10",
             "--stream-timeout", "120",
             "--retry-open", "5",
