@@ -1,0 +1,5 @@
+*.ts
+*.mp4
+*.mkv
+__pycache__/
+STOP

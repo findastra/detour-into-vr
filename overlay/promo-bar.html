@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Detour Promo Bar</title>
+<!--
+  OBS Browser Source: Local file = this file, Width 1080, Height 96.
+  Transparent background. Rotates follow reminders in a random order and,
+  every few messages, shows who is playing right now in the Barn and the Bassment.
+  Edit the MESSAGES list below to change the wording.
+-->
+<style>
+  :root { --pink: #ff3ea5; --cyan: #29f0ff; --ink: #ffffff; --bg: rgba(10, 6, 20, 0.82); }
+  html, body { margin: 0; width: 1080px; height: 96px; overflow: hidden; background: transparent; }
+  body { font-family: "Segoe UI", "Arial Black", system-ui, sans-serif; color: var(--ink); }
+  .bar {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: var(--bg); border-top: 3px solid var(--pink); border-bottom: 3px solid var(--cyan);
+    box-sizing: border-box;
+  }
+  .msg {
+    font-size: 40px; font-weight: 800; letter-spacing: 0.5px; white-space: nowrap;
+    text-shadow: 0 0 12px rgba(255, 62, 165, 0.7);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .msg.out { opacity: 0; transform: translateY(18px); }
+  .msg .hl { color: var(--cyan); }
+  .msg.small { font-size: 32px; }
+  .msg.pop { animation: pop 1.2s ease-in-out 2; }
+  @keyframes pop { 50% { transform: scale(1.08); text-shadow: 0 0 24px var(--pink); } }
+</style>
+</head>
+<body>
+<div class="bar"><div class="msg" id="msg"></div></div>
+<script>
+  const MESSAGES = [
+    'Follow me on TikTok <span class="hl">@findastra</span>',
+    'Tap <span class="hl">+ Follow</span> so you catch the next VR rave',
+    'Follow DETOUR on Twitch <span class="hl">twitch.tv/detourvr</span>',
+    'DETOUR on Instagram <span class="hl">@kupobeat</span>',
+    'Live from <span class="hl">DETOUR</span> · VRChat × IRL rave, Washington DC',
+    'Share the live with a raver friend <span class="hl">↗</span>',
+  ];
+  // Call-to-action lines that get the "pop" animation.
+  const CTA = new Set([0, 1, 2]);
+
+  // DETOUR Mile 04 sets from vrc.tl/detour, as [start, end, name] in Unix seconds.
+  const SETS = {
+    BARN: [
+      [1791577800,1791580500,"Novatosh"],[1791580500,1791583200,"LMFAO"],[1791583200,1791585900,"DJ Adsy"],
+      [1791585900,1791588600,"TVHead"],[1791588600,1791592200,"OkGold"],[1791592200,1791594900,"sheepsheep"],
+      [1791594900,1791597600,"JustJaime"],[1791597600,1791600300,"Neokai"],[1791600300,1791611100,"TRANSIT Crew"],
+      [1791611100,1791613800,"NEONMYST"],[1791613800,1791616500,"_pegasys"],[1791616500,1791619200,"Stroobie + KatzIn4K"],
+      [1791619200,1791621900,"Spyy"],[1791621900,1791624600,"MicRoesoft"],[1791624600,1791627300,"Neptune Orbital"],
+      [1791666000,1791669600,"Hana"],[1791669600,1791672300,"Knosis"],[1791672300,1791675000,"eu_ology"],
+      [1791675000,1791678600,"Ikewulf"],[1791678600,1791681300,"Tresch"],[1791681300,1791684000,"Aquaman"],
+      [1791684000,1791686700,"Firescaw"],[1791686700,1791689400,"Creator T + Ken Volt"],[1791689400,1791697500,"Refuge Crew"],
+      [1791697500,1791700200,"Xia"],[1791700200,1791702900,"NOREASTAH"],[1791702900,1791705600,"gamenite"],
+      [1791705600,1791708300,"Bert60Hz"],[1791708300,1791711000,"Nono"],
+    ],
+    BASSMENT: [
+      [1791591300,1791594000,"Slash Gallagher"],[1791594000,1791596700,"The Nordic Sage"],[1791596700,1791599400,"Mayo"],
+      [1791599400,1791602100,"TsoLit"],[1791602100,1791610200,"OFFLINE Crew"],[1791610200,1791618300,"Letha Crew"],
+      [1791618300,1791621000,"Bean"],[1791621000,1791623700,"Windward"],
+      [1791677700,1791680400,"SwordsNoble"],[1791680400,1791683100,"Leyne"],[1791683100,1791685800,"APL"],
+      [1791685800,1791688500,"Kuro + _Orso"],[1791688500,1791693900,"TRANSIT Crew"],[1791693900,1791696600,"treesleeper"],
+      [1791696600,1791699300,"Mayor of Texas"],[1791699300,1791702000,"Medii"],[1791702000,1791704700,"Clara"],
+      [1791704700,1791707400,"Sir Rose + zeldorable"],[1791707400,1791710100,"RefleXIII"],
+    ],
+  };
+
+  function nowPlaying() {
+    const t = Date.now() / 1000;
+    const parts = [];
+    for (const [room, sets] of Object.entries(SETS)) {
+      const s = sets.find(([a, b]) => t >= a && t < b);
+      if (s) parts.push(`${room}: <span class="hl">${s[2]}</span>`);
+    }
+    return parts.length ? 'NOW · ' + parts.join('  ·  ') : null;
+  }
+
+  const el = document.getElementById('msg');
+  let bag = [];
+  let shown = 0;
+
+  function nextMessage() {
+    shown++;
+    const np = nowPlaying();
+    if (np && shown % 3 === 0) return { html: np, small: true, cta: false };
+    if (!bag.length) bag = MESSAGES.map((_, i) => i).sort(() => Math.random() - 0.5);
+    const i = bag.pop();
+    return { html: MESSAGES[i], small: false, cta: CTA.has(i) };
+  }
+
+  function show() {
+    const m = nextMessage();
+    el.classList.add('out');
+    setTimeout(() => {
+      el.innerHTML = m.html;
+      el.className = 'msg' + (m.small ? ' small' : '') + (m.cta ? ' pop' : '');
+    }, 500);
+    // Random 10-16 second hold so it never feels like a metronome.
+    setTimeout(show, 10000 + Math.random() * 6000);
+  }
+  show();
+</script>
+</body>
+</html>
