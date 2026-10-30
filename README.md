@@ -35,3 +35,7 @@ Bassment right now.
    [vrc.tl/detour](https://vrc.tl/detour). This repo is only Astra's streaming setup.
 2. Built with Claude Opus 5.5, 2026-10-09.
 3. The picture above is a screenshot of the overlay, 2026-10-29.
+
+## License
+
+MIT for the code, see [LICENSE](LICENSE). Pictures and art stay Astra's. DETOUR's name belongs to its event.
